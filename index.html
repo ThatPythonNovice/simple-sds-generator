@@ -241,7 +241,7 @@ body {
   font-size: 11pt; font-weight: 700; letter-spacing: 1px; white-space: nowrap;
 }
 .zone-product .pvalue {
-  font-size: 18pt; font-weight: 900; flex: 1; line-height: 1.1; letter-spacing: -0.5px; word-break: break-word;
+  font-size: 26pt; font-weight: 900; flex: 1; line-height: 1; letter-spacing: -0.5px; word-break: break-word;
 }
 
 /* ---------- Middle row: NFPA | GHS | Signal+HMIS ----------
@@ -342,14 +342,14 @@ body {
 }
 
 /* ---------- Zone 4: Signal Word + HMIS (narrow right column) ---------- */
-.sigh-zone { display: grid; grid-template-rows: auto 1fr; min-height: 0; overflow: hidden; }
+.sigh-zone { display: grid; grid-template-rows: auto 1fr; min-height: 0; }
 .signal-zone {
   border-bottom: 3px solid #000;
   padding: 0.08in 0.1in 0.1in;
   text-align: center;
 }
 .signal-zone .slabel { font-size: 8pt; font-weight: 800; letter-spacing: 2.5px; color: #555; }
-.signal-zone .sword  { font-size: 27pt; font-weight: 900; line-height: 1; margin-top: 3px; letter-spacing: -1px; }
+.signal-zone .sword  { font-size: 32pt; font-weight: 900; line-height: 1; margin-top: 3px; letter-spacing: -1px; }
 .signal-zone .sword.danger  { color: #b00000; }
 .signal-zone .sword.warning { color: #d2691e; }
 .signal-zone .sword.none {
@@ -368,7 +368,7 @@ body {
 }
 .hmis-row {
   display: flex; align-items: stretch; flex: 1; min-height: 22px;
-  border: 1px solid #000; margin-top: -1px;
+  border-left: 1px solid #000; border-right: 1px solid #000; border-bottom: 1px solid #000;
 }
 .hmis-row .lab {
   flex: 1; display: flex; align-items: center;
@@ -527,14 +527,19 @@ body {
 }
 .fa-box {
   flex: 1;
-  padding: 0.08in 0.12in;
+  padding: 0.06in 0.12in;
   display: flex;
   flex-direction: column;
   min-height: 0;
   overflow: hidden;
 }
+.fa-box.ppe-box {
+  border-top: 2px solid #000;
+  background: #fff7e0;   /* subtle highlight so PPE catches the eye */
+}
+.fa-box.ppe-box h4 { color: #6a0000; }
 .hp-info h4, .fa-box h4, .supplier-info h4 {
-  margin: 0 0 4px 0; font-size: 9pt; line-height: 1; letter-spacing: 1.5px;
+  margin: 0 0 4px 0; font-size: 9pt; letter-spacing: 1.5px;
   text-transform: uppercase; font-weight: 800;
   border-bottom: 1px solid #000; padding-bottom: 2px;
 }
@@ -767,7 +772,8 @@ body[data-mode="sticker"] .label-outer   { display: none; }
       </div>
 
       <div class="fg">
-        <h3>Hazard Information</h3>
+        <h3>Statements</h3>
+        <label>Hazard Statements</label>
         <textarea id="f-hazard" placeholder="e.g. H225 Highly flammable liquid and vapour."></textarea>
       </div>
 
@@ -822,7 +828,7 @@ body[data-mode="sticker"] .label-outer   { display: none; }
       <div class="fg">
         <h3>Supplier Info</h3>
         <label>Company Name</label><input type="text" id="s-company">
-        <label>Address</label><textarea id="s-address" rows="2"></textarea>
+        <label>Address</label><input type="text" id="s-address">
         <label>Emergency Phone</label><input type="text" id="s-phone">
         <label>Prepared By</label><input type="text" id="s-prep">
         <label>Date</label><input type="text" id="s-date">
@@ -917,7 +923,7 @@ body[data-mode="sticker"] .label-outer   { display: none; }
                 &nbsp;·&nbsp;
                 <b>HMIS</b> (the colored bars) &rarr; for daily workers + See PPE Below
                 &nbsp;·&nbsp;
-                Baseline Rhenus PPE requirements still apply
+                Baseline facility PPE requirements still apply
               </div>
             </div>
             <div class="ghs-shown-line">
@@ -962,8 +968,10 @@ body[data-mode="sticker"] .label-outer   { display: none; }
           <div class="zone-bottom">
             <div class="hp-info">
               <h4>Hazard Information</h4>
-              <div class="htxt" id="lbl-hazard"></div>
+              <div class="htxt"><span class="pl">Hazard:</span> <span id="lbl-hazard"></span></div>
             </div>
+            <!-- First-aid cell split into two stacked boxes:
+                 top = first-aid instructions, bottom = required PPE -->
             <div class="first-aid">
               <div class="fa-box">
                 <h4>First Aid</h4>
@@ -973,7 +981,7 @@ body[data-mode="sticker"] .label-outer   { display: none; }
             <div class="supplier-info">
               <h4>Supplier Info</h4>
               <div class="srow"><b id="lbl-company"></b></div>
-              <div class="srow" id="lbl-address" style="white-space: pre-wrap;"></div>
+              <div class="srow" id="lbl-address"></div>
               <div class="srow"><b>Emergency:</b> <span id="lbl-phone"></span></div>
               <div class="srow"><b>Prepared by:</b> <span id="lbl-prep"></span></div>
               <div class="srow"><b>Date:</b> <span id="lbl-date"></span></div>
@@ -1272,7 +1280,7 @@ function sizeSticker() {
    Update preview from form values
    ============================================================ */
 const $ = id => document.getElementById(id);
-const setText = (id, v) => { $(id).textContent = v || ''; };
+const setText = (id, v) => { const el = $(id); if (el) el.textContent = v || ''; };
 
 function update() {
   // Product
@@ -1295,6 +1303,7 @@ function update() {
 
   // Statements + first aid
   setText('lbl-hazard',   $('f-hazard').value);
+  setText('lbl-prec',     $('f-prec').value);
   setText('lbl-firstaid', $('f-firstaid').value);
 
   // GHS pictograms — toggle active class + inject SVG (or clear),
@@ -1377,7 +1386,6 @@ function update() {
   const ppeText = ppeCode === 'NONE' ? 'None specified' : `${ppeCode} — ${PPE_CODES[ppeCode] || ''}`;
   setText('s-ppe-display', ppeText);
 
-  // Hazard + precautionary text (combined in compact space)
   setText('s-lbl-hazard', $('f-hazard').value);
 
   // GHS pictograms for sticker cluster
@@ -1663,7 +1671,11 @@ function populateLibrarySelect() {
 }
 
 /* ── Google Drive sync ──────────────────────────────────────── */
-const GOOGLE_CLIENT_ID  = '165093491592-se8p80t7j7tl4j939fb2a7jl6tfhul75.apps.googleusercontent.com';
+// Replace with your own OAuth Client ID to enable Drive sync — see the
+// "Setting Up Google Drive Sync" section in README.md for step-by-step
+// instructions. Without this, the tool still works fully via localStorage
+// and the Export/Import JSON buttons.
+const GOOGLE_CLIENT_ID  = 'YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com';
 const DRIVE_SCOPE       = 'https://www.googleapis.com/auth/drive.file';
 const DRIVE_FILE_NAME   = 'chem_label_library.json';
 
@@ -1814,6 +1826,7 @@ function deleteFromLibrary() {
 function clearForm() {
   $('f-product').value  = '';
   $('f-hazard').value   = '';
+  $('f-prec').value     = '';
   $('f-firstaid').value = '';
   document.querySelector('input[name="signal"][value="DANGER"]').checked = true;
   ['n-health','n-flame','n-inst'].forEach(id => $(id).value = '0');
